@@ -1,6 +1,6 @@
 import React, { createRef, Component } from "react";
 import * as d3 from "d3";
-
+import Tooltip from "./Tooltip";
 class PieClass extends Component {
   constructor(props) {
     super(props);
@@ -10,10 +10,26 @@ class PieClass extends Component {
       .value(d => d.value)
       .sort(null);
     this.createArc = d3.arc();
-    // .innerRadius(20)
-    // .outerRadius(90);
     this.colors = d3.scaleOrdinal(d3.schemeCategory10);
     this.format = d3.format(".2f");
+    this.state = {
+      hover: false
+    };
+  }
+  setHover(hX) {
+    this.setState({
+      hover: hX
+    });
+  }
+  setCordsX(cordsX) {
+    this.setState({
+      left: cordsX
+    });
+  }
+  setCordsY(cordsY) {
+    this.setState({
+      top: cordsY
+    });
   }
   componentDidMount() {
     const svg = d3.select(this.ref.current);
@@ -23,6 +39,7 @@ class PieClass extends Component {
       .attr("class", "chart")
       .attr("width", width)
       .attr("height", height);
+
     const group = svg.append("g").attr("transform", `translate(90 90)`);
     const groupWithEnter = group
       .selectAll("g.arc")
@@ -32,7 +49,15 @@ class PieClass extends Component {
     path
       .append("path")
       .attr("class", "arc")
-      .attr("d", this.createArc);
+      .attr("d", this.createArc)
+      .on("mousemove", e => {
+        this.setHover(e.value);
+        this.setCordsX(d3.event.pageX);
+        this.setCordsY(d3.event.pageY);
+      })
+      .on("mouseleave", d => {
+        setTimeout(() => this.setHover(null), 100);
+      });
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -61,10 +86,10 @@ class PieClass extends Component {
     this.createArc = d3
       .arc()
       .innerRadius(inner)
-      .outerRadius(function(d) {
+      .outerRadius(function (d) {
         return (radius - inner) * (d.data.value / 100) + inner;
       })
-      .startAngle(function() {
+      .startAngle(function () {
         var startAngle = 0;
         var endAngle = 0;
         if (i === 0) {
@@ -78,7 +103,7 @@ class PieClass extends Component {
         tempEndAngle = endAngle;
         return startAngle;
       })
-      .endAngle(function() {
+      .endAngle(function () {
         var startAngle = 0;
         var endAngle = 0;
         if (j === 0) {
@@ -106,14 +131,13 @@ class PieClass extends Component {
       .attr("fill-opacity", "0.7")
       .attr("stroke", (d, i) => this.colors(i))
       .attr("stroke-width", "1");
-
     let outlineArc = d3
       .arc()
       .innerRadius(inner)
-      .outerRadius(function(d) {
+      .outerRadius(function (d) {
         return radius;
       })
-      .startAngle(function() {
+      .startAngle(function () {
         var startAngle = 0;
         var endAngle = 0;
         if (i === 0) {
@@ -127,7 +151,7 @@ class PieClass extends Component {
         tempEndAngle = endAngle;
         return startAngle;
       })
-      .endAngle(function() {
+      .endAngle(function () {
         var startAngle = 0;
         var endAngle = 0;
         if (j === 0) {
@@ -153,17 +177,22 @@ class PieClass extends Component {
       .style("stroke-dasharray", "1, 4")
       .attr("transform", `translate(90 90)`);
 
-    // const text = groupWithUpdate.append("text").merge(group.select("text"));
+    const text = groupWithUpdate.append("text").merge(group.select("text"));
 
-    // text
-    //   .attr("text-anchor", "middle")
-    //   .attr("alignment-baseline", "middle")
-    //   .attr("transform", d => `translate(${this.createArc.centroid(d)})`)
-    //   .text(d => console.log(d.value));
+    text
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("transform", d => `translate(${this.createArc.centroid(d)})`)
+      .text(d => d.value);
   }
 
   render() {
-    return <svg ref={this.ref} />;
+    return (
+      <div>
+        <svg ref={this.ref} />
+        {this.state.hover && <Tooltip prop={this.state} />}
+      </div>
+    );
   }
 }
 

@@ -28,9 +28,10 @@ function App() {
       </div>
 
       <div>
-        <span className="label">Aster plot</span>
+        <h1 />
         <PieClass data={data} width={180} height={200} />
       </div>
+      <span className="label">Aster plot</span>
     </div>
   );
 }

@@ -5,9 +5,16 @@
 span {
   margin: 20px;
 }
-/* .chart {
-  background: lightgray;
-} */
 .arc {
   opacity: 0.85;
+}
+span.tooltip:after {
+  content: " ";
+  position: absolute;
+  top: 53%;
+  right: 100%; /* To the left of the tooltip */
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent gray transparent transparent;
 }
